@@ -230,12 +230,11 @@ The different results demonstrate how changing the importance of features can in
 
 ## 💡 What I Learned
 
-Building VibeFinder helped me understand how recommendation systems use data, feature comparisons, and scoring rules to generate personalized suggestions.
+Building VibeFinder helped me understand how recommendation systems transform user preferences and item characteristics into personalized recommendations. Initially, I thought recommending music was mainly about matching a user's favorite genre and mood. However, experimenting with different scoring weights showed me that even small changes in feature importance can significantly affect recommendation rankings. Adding advanced attributes such as popularity, release decade, mood tags, language, and instrumentalness also helped me explore how a recommendation system can consider more than basic genre and audio preferences.
 
-I also learned how design patterns and object-oriented programming can make a system more flexible and maintainable. Implementing multiple recommendation strategies showed me that the same dataset and user profile can produce different results depending on how features are prioritized.
+One of my biggest learning experiences was implementing the Strategy Design Pattern. Creating Balanced, Genre First, Mood First, and Energy First strategies taught me how object-oriented programming can separate an algorithm's behavior from the main recommendation system. Instead of rewriting the recommender whenever I wanted to experiment with a different approach, I could switch strategies while keeping the rest of the system consistent.
 
-This project also highlighted the limitations of manually designed recommendation systems, especially the influence of subjective weights, limited datasets, and potential recommendation bias.
-
+This project also made me think more critically about bias in AI systems. A recommendation system reflects the choices made by its developers, including which features receive more weight and which data is included. A system that prioritizes genre too heavily might repeatedly recommend similar music and limit opportunities for users to discover something new. I learned that building a recommendation system is not just about producing high scores; it is also about understanding the assumptions, limitations, and potential consequences behind those scores.
 ---
 
 **Project:** VibeFinder 1.0  
