@@ -68,7 +68,20 @@ def load_songs(csv_path: str) -> List[Dict]:
                 "tempo_bpm": float(row["tempo_bpm"]),
                 "valence": float(row["valence"]),
                 "danceability": float(row["danceability"]),
-                "acousticness": float(row["acousticness"])
+                "acousticness": float(row["acousticness"]),
+
+                # Advanced song attributes
+                "popularity": int(row.get("popularity") or 50),
+                "release_decade": int(row.get("release_decade") or 2020),
+                "mood_tags": [
+                    tag.strip().lower()
+                    for tag in (row.get("mood_tags") or "").split("|")
+                    if tag.strip()
+                ],
+                "language": (row.get("language") or "English").strip(),
+                "instrumentalness": float(
+                    row.get("instrumentalness") or 0
+                )
             }
 
             songs.append(song)
@@ -77,29 +90,28 @@ def load_songs(csv_path: str) -> List[Dict]:
 
 
 def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
-    """Calculate a weighted similarity score and explain each matching feature."""
+    """Calculate a weighted similarity score and explain matching features."""
+
     score = 0.0
     reasons = []
 
-    # Genre: maximum 2 points
-    if user_prefs["favorite_genre"].lower() == song["genre"].lower():
-        score += 2.0
-        reasons.append("Genre match (+2.00)")
+    # Original features
 
-    # Mood: maximum 1 point
+    if user_prefs["favorite_genre"].lower() == song["genre"].lower():
+        score += 1.0
+        reasons.append("Genre match (+1.00)")
+
     if user_prefs["favorite_mood"].lower() == song["mood"].lower():
         score += 1.0
         reasons.append("Mood match (+1.00)")
 
-    # Energy: maximum 1.5 points
     energy_points = max(
         0, 1 - abs(user_prefs["target_energy"] - song["energy"])
-    ) * 1.5
+    ) * 3.0
     score += energy_points
     if energy_points > 0:
         reasons.append(f"Energy similarity (+{energy_points:.2f})")
 
-    # Tempo: maximum 1.5 points
     tempo_points = max(
         0, 1 - abs(user_prefs["target_tempo"] - song["tempo_bpm"]) / 120
     ) * 1.5
@@ -107,7 +119,6 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     if tempo_points > 0:
         reasons.append(f"Tempo similarity (+{tempo_points:.2f})")
 
-    # Valence: maximum 1 point
     valence_points = max(
         0, 1 - abs(user_prefs["target_valence"] - song["valence"])
     )
@@ -115,7 +126,6 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     if valence_points > 0:
         reasons.append(f"Valence similarity (+{valence_points:.2f})")
 
-    # Danceability: maximum 1 point
     dance_points = max(
         0, 1 - abs(user_prefs["target_danceability"] - song["danceability"])
     )
@@ -123,13 +133,64 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     if dance_points > 0:
         reasons.append(f"Danceability similarity (+{dance_points:.2f})")
 
-    # Acousticness: maximum 1 point
     acoustic_points = max(
         0, 1 - abs(user_prefs["target_acousticness"] - song["acousticness"])
     )
     score += acoustic_points
     if acoustic_points > 0:
         reasons.append(f"Acousticness similarity (+{acoustic_points:.2f})")
+
+    # Advanced features: only score these when the user specifies them.
+
+    if user_prefs.get("target_popularity") is not None:
+        popularity_points = max(
+            0, 1 - abs(
+                user_prefs["target_popularity"] - song["popularity"]
+            ) / 100
+        ) * 0.5
+        score += popularity_points
+        reasons.append(f"Popularity similarity (+{popularity_points:.2f})")
+
+    if user_prefs.get("preferred_decade") is not None:
+        if user_prefs["preferred_decade"] == song["release_decade"]:
+            score += 0.5
+            reasons.append("Release decade match (+0.50)")
+
+    if user_prefs.get("preferred_mood_tags"):
+        preferred_tags = {
+            tag.lower() for tag in user_prefs["preferred_mood_tags"]
+        }
+        song_tags = set(song["mood_tags"])
+        matching_tags = preferred_tags.intersection(song_tags)
+
+        tag_points = (
+            len(matching_tags) / len(preferred_tags)
+        ) * 1.0
+
+        score += tag_points
+        if matching_tags:
+            reasons.append(
+                f"Mood tag matches: {', '.join(sorted(matching_tags))} "
+                f"(+{tag_points:.2f})"
+            )
+
+    if user_prefs.get("preferred_language") is not None:
+        if user_prefs["preferred_language"].lower() == song["language"].lower():
+            score += 0.5
+            reasons.append("Language match (+0.50)")
+
+    if user_prefs.get("target_instrumentalness") is not None:
+        instrumental_points = max(
+            0, 1 - abs(
+                user_prefs["target_instrumentalness"]
+                - song["instrumentalness"]
+            )
+        ) * 0.5
+
+        score += instrumental_points
+        reasons.append(
+            f"Instrumentalness similarity (+{instrumental_points:.2f})"
+        )
 
     return round(score, 2), reasons
 
