@@ -1,251 +1,243 @@
-# 🎵 Music Recommender Simulation
+# 🎧 VibeFinder 1.0 — Content-Based Music Recommender
 
-## Project Summary
+VibeFinder is a Python-based music recommendation system that recommends songs based on a user's musical preferences. It uses content-based filtering and weighted similarity scoring to compare song characteristics with a user profile.
 
-In this project you will build and explain a small music recommender system.
+The project explores how recommendation systems turn data into personalized suggestions, how scoring weights influence results, and how different recommendation strategies can produce different rankings.
 
-Your goal is to:
+## ✨ Features
 
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
+- **Content-based filtering:** Matches song characteristics against a user's preferences.
+- **Weighted similarity scoring:** Evaluates genre, mood, energy, tempo, valence, danceability, and acousticness.
+- **Advanced song attributes:** Incorporates popularity, release decade, mood tags, language, and instrumentalness.
+- **Four recommendation strategies:** Balanced, Genre First, Mood First, and Energy First.
+- **Recommendation explanations:** Shows why each song received its score.
+- **Multiple user profiles:** Demonstrates how recommendations change for different listening preferences.
+- **CSV dataset:** Loads song information from a structured dataset.
 
-Replace this paragraph with your own summary of what your version does.
+## 🧠 How It Works
 
----
+### 1. Song Data
 
-## How The System Works
+The dataset contains 18 illustrative songs. Each song includes:
 
-Explain your design in plain language.
-
-Some prompts to answer:
-
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
-
-You can include a simple diagram or bullet list if helpful.
-
----
-## How The System Works
-
-### Recommendation Approach
-
-Our simulation uses **content-based filtering** to recommend songs based on a user's musical preferences. Rather than comparing users with similar listening histories, the system compares each song's characteristics against a predefined user profile.
-
-The dataset contains 18 songs across different genres and moods. Each song includes attributes such as genre, mood, energy, tempo, valence, danceability, and acousticness.
-
-### User Profile
-
-For our initial simulation, we use the following user preferences:
-
-| Preference | Target |
+| Attribute | Description |
 |---|---|
-| Favorite Genre | Pop |
-| Favorite Mood | Happy |
-| Target Energy | 0.80 |
-| Target Tempo | 120 BPM |
-| Target Valence | 0.85 |
-| Target Danceability | 0.80 |
-| Target Acousticness | 0.20 |
+| Genre | Musical category, such as pop, rock, or lofi |
+| Mood | Emotional character of the song |
+| Energy | Energy level (0–1) |
+| Tempo | Beats per minute (BPM) |
+| Valence | Musical positivity (0–1) |
+| Danceability | Danceability score (0–1) |
+| Acousticness | Acoustic character (0–1) |
+| Popularity | Illustrative popularity score |
+| Release decade | Song's release decade |
+| Mood tags | Additional descriptive mood labels |
+| Language | Song language |
+| Instrumentalness | Estimated instrumental character (0–1) |
 
-### Finalized Algorithm Recipe
+The additional metadata is illustrative and simulated for this project.
 
-The recommender calculates a weighted similarity score for every song.
+### 2. User Profile
 
-**1. Genre matching:** +2.0 points for an exact genre match.
+A `UserProfile` represents a listener's preferences, including:
 
-**2. Mood matching:** +1.0 point for an exact mood match.
+- Favorite genre and mood
+- Target energy level
+- Preferred tempo
+- Target valence, danceability, and acousticness
+- Optional preferences for popularity, release decade, mood tags, language, and instrumentalness
 
-**3. Numerical feature similarity:** Songs receive partial points based on how close their audio characteristics are to the user's targets.
+### 3. Recommendation Scoring
 
-We use the following weights:
+The system calculates a weighted score for each song based on how closely its characteristics match the user profile.
+
+The standard scoring configuration uses these maximum weights:
 
 | Feature | Maximum Points |
 |---|---:|
-| Genre | 2.0 |
+| Genre | 1.0 |
 | Mood | 1.0 |
-| Energy | 1.5 |
+| Energy | 3.0 |
 | Tempo | 1.5 |
 | Valence | 1.0 |
 | Danceability | 1.0 |
 | Acousticness | 1.0 |
-| **Maximum Total** | **9.0** |
+| **Maximum Total** | **9.5** |
 
-For numerical features, similarity is calculated using:
+Numerical features receive partial credit based on similarity to the user's target values. The system combines the individual contributions to calculate each song's total score.
 
-**Similarity = 1 − (Absolute Difference / Feature Range)**
+Advanced preferences can contribute up to an additional 3 points, bringing the maximum advanced score to **12.5**.
 
-For energy, valence, danceability, and acousticness, the feature range is 1. For tempo, we use a comparison range of 120 BPM. Negative similarity values are treated as zero.
+### 4. Recommendation Strategies
 
-The similarity value is multiplied by the feature's maximum points to determine its contribution to the final score.
+VibeFinder uses the **Strategy Design Pattern** to support different recommendation approaches.
 
-**4. Scoring and ranking:** The system adds all feature points to calculate each song's total score, sorts songs from highest to lowest, and returns the top three recommendations.
+| Strategy | Main Focus |
+|---|---|
+| Balanced | Distributes importance across the main features |
+| Genre First | Gives genre matching greater priority |
+| Mood First | Prioritizes mood similarity |
+| Energy First | Gives energy similarity greater priority |
 
-### Potential Biases and Limitations
+The `Recommender` class accepts a strategy and allows it to be changed using `set_strategy()`. This separates recommendation behavior from the rest of the application and makes it easier to experiment with different approaches.
 
-Our scoring strategy has some potential limitations:
+The project also preserves the `score_song()` and `recommend_songs()` function-based API.
 
-- **Genre bias:** Genre receives the highest individual weight (2 points). This may prioritize songs from a user's favorite genre even when songs from other genres better match their overall mood or audio preferences.
-- **Mood limitations:** Exact mood matching gives no points to songs with different moods, even when their other characteristics closely match the user's taste.
-- **Limited user profile:** Our initial profile uses one favorite genre and one favorite mood. Real listeners often enjoy multiple genres and moods.
-- **Subjective weights:** The scoring weights are manually selected for this simulation and may not accurately represent every user's musical preferences.
-- **Limited dataset:** Our 18-song dataset is relatively small and cannot represent the diversity of real-world music catalogs.
+## 🛠️ Technologies
 
-Future improvements could include multiple preferred genres and moods, adjustable feature weights, and a larger, more diverse dataset.
+- Python
+- CSV
+- Object-Oriented Programming
+- Content-Based Filtering
+- Strategy Design Pattern
+- Pytest
 
-### Implementation Plan
+## 🚀 Getting Started
 
-The system is organized into the following stages:
+### Prerequisites
 
-1. Load song information from the CSV dataset.
-2. Compare song attributes against the user's profile.
-3. Calculate weighted similarity scores.
-4. Rank songs by their total scores.
-5. Return the three highest-scoring recommendations with explanations.
+- Python 3
+- Git
 
-## Simulation Features
+### 1. Clone the repository
 
-### Song Object
+```bash
+git clone https://github.com/nayem-xy/ai110-module3show-musicrecommendersimulation-starter.git
+cd ai110-module3show-musicrecommendersimulation-starter
+```
 
-Each `Song` object will contain:
+### 2. Create and activate a virtual environment
 
-- `id`: Unique identifier for the song.
-- `title`: Name of the song.
-- `artist`: Name of the artist.
-- `genre`: Musical genre (e.g., pop, rock, lofi).
-- `mood`: Emotional character of the song (e.g., happy, chill, intense).
-- `energy`: Energy level (0–1).
-- `tempo_bpm`: Song tempo measured in beats per minute.
-- `valence`: Musical positivity (0–1).
-- `danceability`: Danceability score (0–1).
-- `acousticness`: Acoustic character score (0–1).
+**macOS / Linux:**
 
-### UserProfile Object
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-Each `UserProfile` object will contain:
+**Windows:**
 
-- `preferred_genres`: Genres the user enjoys.
-- `preferred_moods`: Moods the user prefers.
-- `preferred_energy`: Desired energy level (0–1).
-- `preferred_tempo`: Preferred tempo in BPM.
-- `preferred_valence`: Desired musical positivity (0–1).
-- `preferred_danceability`: Desired danceability level (0–1).
-- `preferred_acousticness`: Desired acousticness level (0–1).
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
 
-## Recommendation Logic
-
-1. **Feature Comparison:** Compare each song's characteristics against the user's preferences.
-2. **Similarity Scoring:** Calculate similarity for categorical and numerical features.
-3. **Weighted Scoring:** Combine individual similarity scores using predefined feature weights.
-4. **Ranking:** Sort songs from highest to lowest similarity score.
-5. **Recommendations:** Return the top three songs, excluding songs the user has already selected as favorites.
-
-## Getting Started
-
-### Setup
-
-1. Create a virtual environment (optional but recommended):
-
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate      # Mac or Linux
-   .venv\Scripts\activate         # Windows
-
-2. Install dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Run the app:
+### 4. Run the application
+
+From the project root:
 
 ```bash
-python -m src.main
+python3 -m src.main
 ```
 
-### Running Tests
+The application loads the CSV dataset and displays recommendations for four example user profiles.
 
-Run the starter tests with:
+## 🧪 Running Tests
+
+Run the automated tests with:
 
 ```bash
-pytest
+python3 -m pytest -q
 ```
 
-You can add more tests in `tests/test_recommender.py`.
+## 📊 Sample Output
 
----
-
-## Sample Recommendation Output
-
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
-
-```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
-```
-
-The following output was generated by running `python3 -m src.main` with the default pop/happy user profile.
+Example from the completed application:
 
 ```text
 Loaded songs: 18
 
-Top 3 Recommendations:
+PROFILE: High-Energy Pop
 
-Sunrise City - Score: 8.91/9
-Because: Genre match (+2.00), Mood match (+1.00), Energy similarity(+1.47), Tempo similarity (+1.47), Valence similarity (+0.99), Danceability similarity (+0.99), Acousticness similarity (+0.98)
+1. Sunrise City - Score: 8.71/9.5
+2. Gym Hero - Score: 8.21/9.5
+3. Rooftop Lights - Score: 7.44/9.5
+4. Neon Fever - Score: 7.23/9.5
+5. Funky Friday - Score: 6.93/9.5
 
-Gym Hero - Score: 7.34/9
-Because: Genre match (+2.00), Energy similarity (+1.30), Tempo similarity (+1.35), Valence similarity (+0.92), Danceability similarity (+0.92), Acousticness similarity (+0.85)
+PROFILE: Chill Lofi
 
-Rooftop Lights - Score: 6.68/9
-Because: Mood match (+1.00), Energy similarity (+1.44), Tempo similarity (+1.45), Valence similarity (+0.96), Danceability similarity (+0.98), Acousticness similarity (+0.85)
+1. Library Rain - Score: 9.37/9.5
+2. Midnight Coding - Score: 9.05/9.5
+3. Focus Flow - Score: 8.21/9.5
 ```
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
+
+The application also demonstrates advanced scoring with additional user preferences, producing scores out of 12.5.
+
+## 🔬 Experiments and Evaluation
+
+Several experiments were conducted during development:
+
+- Compared recommendation results across different user profiles.
+- Adjusted scoring weights to examine how feature importance changes rankings.
+- Added advanced song attributes to expand personalization.
+- Implemented four recommendation strategies and compared their top-ranked songs.
+
+One strategy experiment produced these top recommendations:
+
+| Strategy | Top Recommendation |
+|---|---|
+| Genre First | Pop Track |
+| Mood First | Happy Rock |
+| Energy First | Pop Track |
+| Balanced | Pop Track |
+
+The different results demonstrate how changing the importance of features can influence recommendation behavior.
+
+## ⚠️ Limitations
+
+- The dataset contains only 18 songs and is not representative of a real streaming catalog.
+- Some advanced song metadata is simulated.
+- Scoring weights are manually selected rather than learned from real listening behavior.
+- The system does not analyze lyrics, listening history, or user feedback.
+- Content-based recommendations can limit discovery outside a user's stated preferences.
+- The project is an educational simulation, not a production-ready recommendation platform.
+
+## 🔮 Future Improvements
+
+- Expand the dataset with real music metadata.
+- Incorporate listening history and user feedback.
+- Allow users to customize scoring weights.
+- Build an interactive interface.
+- Evaluate recommendations using larger datasets and more comprehensive metrics.
+
+## 📁 Project Structure
+
+```text
+├── data/
+│   └── songs.csv
+├── src/
+│   ├── main.py
+│   ├── recommender.py
+│   └── ai_interactions.md
+├── tests/
+│   └── test_recommender.py
+├── model_card.md
+├── requirements.txt
+└── README.md
+```
+
+## 📚 Documentation
+
+- [Model Card](model_card.md) — Detailed explanation of the model, evaluation, observed behavior, biases, and reflection.
+- [AI Interaction Log](src/ai_interactions.md) — Documentation of AI-assisted development and implementation decisions.
+
+## 💡 What I Learned
+
+Building VibeFinder helped me understand how recommendation systems use data, feature comparisons, and scoring rules to generate personalized suggestions.
+
+I also learned how design patterns and object-oriented programming can make a system more flexible and maintainable. Implementing multiple recommendation strategies showed me that the same dataset and user profile can produce different results depending on how features are prioritized.
+
+This project also highlighted the limitations of manually designed recommendation systems, especially the influence of subjective weights, limited datasets, and potential recommendation bias.
 
 ---
 
-## Experiments You Tried
-
-Use this section to document the experiments you ran. For example:
-
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
-
----
-
-## Limitations and Risks
-
-Summarize some limitations of your recommender.
-
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
-
----
-
-## Reflection
-
-Read and complete `model_card.md`:
-
-[**Model Card**](model_card.md)
-
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
-
-
+**Project:** VibeFinder 1.0  
+**Language:** Python  
+**Focus:** Content-Based Music Recommendation Systems
